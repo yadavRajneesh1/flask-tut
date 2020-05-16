@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{% from "formhelper.html" import render_field %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>wtfForm</title>
+</head>
+<body>
+<h1>We are going to work on wtf-form</h1>
+<form method="POST" action="/">
+    <dl>
+    {{form.csrf_token}}
+    {{render_field(form.username)}}
+    {{render_field(form.password)}}
+    {{render_field(form.remember)}}
+    {{render_field(form.submit)}}
+    </dl>
+</form>
+</body>
+</html>

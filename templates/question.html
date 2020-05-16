@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% from "formhelper.html" import render_field %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>question</title>
+</head>
+<body>
+<div>
+<form method="POST" action="/ques">
+    <dl>
+
+        {{render_field(quest.Question)}}
+        {{render_field(quest.option1)}}
+        {{render_field(quest.option2)}}
+        {{render_field(quest.option3)}}
+        {{render_field(quest.option3)}}
+        {{render_field(quest.option4)}}
+    </dl>
+</form>
+</div>
+</body>
+</html>
