@@ -27,6 +27,8 @@ else:
 
 db = SQLAlchemy(app)
 
+'''sno,name,email,phone_num,mass,date'''
+
 
 class Contact(db.Model):
     sno = db.Column(db.Integer, primary_key=True)
