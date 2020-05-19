@@ -1,5 +1,5 @@
 import datetime
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response, session
 from flask_wtf import FlaskForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import StringField, PasswordField, TextAreaField, SubmitField, BooleanField
@@ -13,7 +13,7 @@ import json
 app = Flask(__name__)
 with open("config.json", "r") as f:
     params = json.load(f)['params']
-app.config['secret_key'] = params['secret_key']
+app.secret_key = params['secret_key']
 app.config['SQLALCHEMY_DATABASE_URI'] = params['local_uri']
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -125,21 +125,46 @@ def delete_user(public_id):
     return jsonify({'Message': 'User Deleted Successfully'})
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    auth = request.authorization
-    if not auth or not auth.username or not auth.password:
-        return make_response('could not verify correctly eigher username or password or both')
-    userone = usernew.query.filter_by(UserEmail=auth.username).first()
-    if not userone:
-        return make_response('Please make you account before login')
-    if check_password_hash(userone.UserPassword, auth.password):
-        token = jwt.encode(
-            {'public_id': userone.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=2)},
-            app.config['secret_key'])
-        return jsonify({'token': token.decode('UTF-8')})
+    log = Login()
+    print("login====1")
+    if log.validate_on_submit():
+        print("login====2")
+        print(request)
+        auth = request.authorization
+        print("auth-------{}".format(auth))
+        if not auth or not auth.username or not auth.password:
+            return make_response('could not verify correctly eigher username or password or both')
+        userone = usernew.query.filter_by(UserEmail=auth.username).first()
+        if not userone:
+            return make_response('Please make you account before login')
+        if check_password_hash(userone.UserPassword, auth.password):
+            token = jwt.encode(
+                {'public_id': userone.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=1)},
+                app.config['secret_key'])
+            return jsonify({'token': token.decode('UTF-8')})
+    print("login====3")
+    return render_template('newlogin.html', form=log)
 
-    return ''
+
+@app.route('/loginnew', methods=['GET', 'POST'])
+def loginnew():
+    log = Login()
+    if request.method == 'POST':
+        session.pop('username', None)
+        username = request.form['username']
+        password = request.form['password']
+        print(username)
+        print(password)
+        userone = usernew.query.filter_by(UserEmail=username).first()
+        #print(userone.UserEmail)
+        if userone and check_password_hash(userone.UserPassword, password):
+            session['user_id']=userone.public_id
+            return '<h1>you are login</h1>'
+        return '<h1>Please make sure your credentials your username or password or both are incorrect</h1>'
+
+    return render_template('newlogin.html', form=log)
 
 
 @app.route('/view', methods=['GET', 'POST'])
